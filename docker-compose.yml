@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: ./backend
+    ports: ["8080:8080"]
+    environment:
+      DB_HOST: mongo
+      DB_PORT: "27017"
+      DB_USER: admin
+      DB_PASSWORD: password
+      DB_NAME: tasksdb
+    depends_on: [mongo]
+
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    environment:
+      BACKEND_URL: http://backend:8080
+    depends_on: [backend]
+
+  mongo:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-db:/data/db
+volumes:
+  mongo-db:
