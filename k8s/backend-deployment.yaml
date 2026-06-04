@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend # find pods with this label to manage
+  template:
+    metadata:
+      labels:
+        app: backend # pods get this label
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/vishesh3011/k8s-wrangler/backend:latest@sha256:78274759ffc9964564ec09ae8c5d13bd3ba94a622a62e64bddd2718e3af6b5a0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: "mongo-service"
+            - name: DB_PORT
+              value: "27017"
+            - name: DB_USER
+              value: "admin"
+            - name: DB_PASSWORD
+              value: "password"
+            - name: DB_NAME
+              value: "tasksdb"
+          # Resource limits — set these from day 1.
+          # Without them, one misbehaving pod can starve the whole node.
+          # requests = guaranteed minimum, limits = hard ceiling
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m" # 100m = 0.1 CPU core
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          # Liveness probe: K8s restarts the pod if this fails
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          # Readiness probe: K8s only sends traffic once this passes
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
