@@ -41,6 +41,7 @@ jobs:
               with:
                   context: ./backend
                   push: true
+                  platforms: linux/amd64
                   tags: |
                       ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
                       ${{ env.BACKEND_IMAGE }}:latest
@@ -79,6 +80,7 @@ jobs:
               with:
                   context: ./frontend
                   push: true
+                  platforms: linux/amd64
                   tags: |
                       ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
                       ${{ env.FRONTEND_IMAGE }}:latest
