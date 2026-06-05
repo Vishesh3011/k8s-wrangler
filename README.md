@@ -23,12 +23,12 @@ Browser ──────────► │  frontend-service (NodePort :30080
                     │  ┌─────────────────┐                                │
                     │  │  React Frontend  │  Deployment · 2 replicas      │
                     │  │  nginx :80       │  serves static build          │
-                    │  └────────┬────────┘  proxies /api/* to backend     │
+                    │  └────────┬────────┘  proxies * to backend     │
                     │           │                                         │
                     │           ▼  backend-service (ClusterIP :8080)      │
                     │  ┌─────────────────┐                                │
                     │  │   Go REST API   │  Deployment · 2 replicas       │
-                    │  │   :8080         │  /api/tasks GET + POST         │
+                    │  │   :8080         │  tasks GET + POST         │
                     │  └────────┬────────┘  /health liveness probe        │
                     │           │                                         │
                     │           ▼  mongo-service (ClusterIP :27017)       │
@@ -185,7 +185,7 @@ kubectl get endpoints
 
 # 4. Backend can reach MongoDB?
 kubectl exec -it $(kubectl get pod -l app=backend -o jsonpath='{.items[0].metadata.name}') -- \
-  wget -qO- http://localhost:8080/api/tasks
+  wget -qO- http://localhost:8080/tasks
 # Should return [] or existing tasks — proves MongoDB connection works
 
 # 5. Frontend nginx can reach backend service by DNS name?
