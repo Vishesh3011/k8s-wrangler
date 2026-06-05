@@ -118,3 +118,54 @@ jobs:
             - name: Cleanup
               if: always()
               run: docker compose down -v
+
+    # Job 4: Validate Kubernetes Manifests
+    validate-manifests:
+      runs-on: ubuntu-latest
+      needs: [build-backend, build-frontend]
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Install kubectl
+          uses: azure/setup-kubectl@v3
+
+        - name: Validate Kubernetes manifests
+          run: |
+            # --dry-run=client validates manifest syntax without
+            # needing a real cluster. Catches typos, wrong apiVersions,
+            # missing required fields before they reach production.
+            kubectl apply -f k8s/ --dry-run=client
+            echo "All manifests valid"
+    
+    # Job 5: Deploy to Kubernetes (placeholder)
+    deploy:
+      runs-on: ubuntu-latest
+      needs: validate-manifests
+      # Only deploy on pushes to main, not PRs
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Update image tags in manifests
+          run: |
+            # Replace 'latest' image tags with the exact commit SHA.
+            # Same traceability principle from Project 1 — every deployment
+            # is pinned to the exact commit that triggered it.
+            sed -i "s|${{ env.BACKEND_IMAGE }}:latest|${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" k8s/backend-deployment.yaml
+            sed -i "s|${{ env.FRONTEND_IMAGE }}:latest|${{ env.FRONTEND_IMAGE }}:${{ github.sha }}|g" k8s/frontend-deployment.yaml
+
+        - name: Deploy to Kubernetes
+          run: |
+            # In a real project: configure kubeconfig here using a secret
+            # pointing at your cloud cluster (EKS, GKE, etc).
+            # For portfolio: the validate-manifests job above is the
+            # meaningful CI signal. Document this in your README.
+            echo "Manifests validated and images pushed."
+            echo "Deployment target: minikube (local) / cloud cluster (production)"
+            echo "Images ready at:"
+            echo "  ${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+            echo "  ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/vishesh3011/k8s-wrangler/frontend:7d706bd8d52eddd66313088dbbbb7af32bf251b4@sha256:1fe752908379bab526248dde513fc3e308973fdddf7f0034690740d5f0c1ec18
+          image: ghcr.io/vishesh3011/k8s-wrangler/frontend:cdb8e048e977da68e30cc3c371c05ad417dc5fef@sha256:7512afbd7443c7b6e3ac870158295c5080e23bc9453f285d241f4a2e8e3feead
           ports:
             - containerPort: 80 # nginx listens on 80 inside the container
           resources:
