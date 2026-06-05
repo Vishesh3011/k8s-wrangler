@@ -40,11 +40,13 @@ func main() {
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 
 	responseStr := "i am alive!!!"
-	json.NewEncoder(w).Encode(healthCheckResponse{Status: responseStr})
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(healthCheckResponse{Status: responseStr})
 }
 
 func getTasksFromDB(ctx context.Context, collection *mongo.Collection) ([]Task, error) {
@@ -85,8 +87,9 @@ func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 	for i, task := range tasks {
 		taskNames[i] = task.Name
 	}
-	json.NewEncoder(w).Encode(tasksResponse{Tasks: taskNames})
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tasksResponse{Tasks: taskNames})
 }
 
 func addTaskToDB(ctx context.Context, collection *mongo.Collection, taskName string) error {
@@ -144,29 +147,34 @@ type Task struct {
 }
 
 func initDB(ctx context.Context) *mongo.Collection {
-	mongoDBUrl := getMongoDBUrl()
+	mongoDBUrl, dbName := getMongoDBUrl()
 	fmt.Printf("Connecting to MongoDB at: %s\n", mongoDBUrl)
 
 	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoDBUrl))
 	if err != nil {
 		fmt.Printf("Error connecting to MongoDB: %v\n", err)
+		os.Exit(1)
 	}
 	err = mongoClient.Ping(ctx, nil)
 	if err != nil {
 		fmt.Printf("Error pinging MongoDB: %v\n", err)
-	} else {
-		fmt.Println("Successfully connected to MongoDB")
+		os.Exit(1)
 	}
+	fmt.Println("Successfully connected to MongoDB")
 
-	tasksCollection := mongoClient.Database("tasksdb").Collection("tasks")
-	tasksCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
+	tasksCollection := mongoClient.Database(dbName).Collection("tasks")
+	_, err = tasksCollection.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys:    bson.M{"created_at": 1},
 		Options: options.Index().SetExpireAfterSeconds(3600),
 	})
+	if err != nil {
+		fmt.Printf("Error creating MongoDB index: %v\n", err)
+		os.Exit(1)
+	}
 	return tasksCollection
 }
 
-func getMongoDBUrl() string {
+func getMongoDBUrl() (string, string) {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		host = "0.0.0.0"
@@ -188,5 +196,5 @@ func getMongoDBUrl() string {
 		dbName = "tasksdb"
 	}
 
-	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authSource=admin", user, password, host, port, dbName)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s?authSource=admin&authMechanism=SCRAM-SHA-256", user, password, host, port, dbName), dbName
 }

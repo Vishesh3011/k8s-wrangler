@@ -20,8 +20,8 @@ func TestGetMongoDBUrl_Defaults(t *testing.T) {
 	os.Unsetenv("DB_PASSWORD")
 	os.Unsetenv("DB_NAME")
 
-	url := getMongoDBUrl()
-	if url != "mongodb://admin:password@0.0.0.0:27017/tasksdb?authSource=admin" {
+	url, _ := getMongoDBUrl()
+	if url != "mongodb://admin:password@0.0.0.0:27017/tasksdb?authSource=admin&authMechanism=SCRAM-SHA-256" {
 		t.Fatalf("expected default URL, got %q", url)
 	}
 }
@@ -33,8 +33,8 @@ func TestGetMongoDBUrl_FromEnv(t *testing.T) {
 	t.Setenv("DB_PASSWORD", "testpass")
 	t.Setenv("DB_NAME", "mytasks")
 
-	url := getMongoDBUrl()
-	if url != "mongodb://testuser:testpass@mongo.example.com:12345/mytasks?authSource=admin" {
+	url, _ := getMongoDBUrl()
+	if url != "mongodb://testuser:testpass@mongo.example.com:12345/mytasks?authSource=admin&authMechanism=SCRAM-SHA-256" {
 		t.Fatalf("expected env URL, got %q", url)
 	}
 }
