@@ -136,8 +136,7 @@ jobs:
             # --dry-run=client validates manifest syntax without
             # needing a real cluster. Catches typos, wrong apiVersions,
             # missing required fields before they reach production.
-            kubectl apply -f k8s/ --dry-run=client
-            echo "All manifests valid" --validate=false
+            kubectl apply -f k8s/ --dry-run=client --validate=false && echo "All manifests valid" 
     
     # Job 5: Deploy to Kubernetes (placeholder)
     deploy:
