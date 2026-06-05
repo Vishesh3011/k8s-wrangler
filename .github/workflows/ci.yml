@@ -137,7 +137,7 @@ jobs:
             # needing a real cluster. Catches typos, wrong apiVersions,
             # missing required fields before they reach production.
             kubectl apply -f k8s/ --dry-run=client
-            echo "All manifests valid"
+            echo "All manifests valid" --validate=false
     
     # Job 5: Deploy to Kubernetes (placeholder)
     deploy:
