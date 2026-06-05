@@ -6,33 +6,33 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      app: frontend         # must match pod template labels below
+      app: frontend # must match pod template labels below
   template:
     metadata:
       labels:
-        app: frontend       # must match selector above AND service selector below
+        app: frontend # must match selector above AND service selector below
     spec:
       containers:
-      - name: frontend
-        image: ghcr.io/vishesh3011/three-tier-k8s/frontend:latest
-        ports:
-        - containerPort: 80   # nginx listens on 80 inside the container
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /           # nginx serves / — good enough for liveness
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: frontend
+          image: ghcr.io/vishesh3011/k8s-wrangler/frontend:7d706bd8d52eddd66313088dbbbb7af32bf251b4@sha256:1fe752908379bab526248dde513fc3e308973fdddf7f0034690740d5f0c1ec18
+          ports:
+            - containerPort: 80 # nginx listens on 80 inside the container
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: / # nginx serves / — good enough for liveness
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ghcr.io/vishesh3011/k8s-wrangler/backend:de59d5ecdf1ae4e90faa15ade26cf360bbfbdd4b@sha256:438aeda02ad1573a0c0a1e7bdadcee134569ba81f06c10c75c9956cfe966c5ba
+          image: ghcr.io/vishesh3011/k8s-wrangler/backend:7d706bd8d52eddd66313088dbbbb7af32bf251b4@sha256:438aeda02ad1573a0c0a1e7bdadcee134569ba81f06c10c75c9956cfe966c5ba
           ports:
             - containerPort: 8080
           env:
