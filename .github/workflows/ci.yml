@@ -133,10 +133,10 @@ jobs:
 
       - name: Validate Kubernetes manifests
         run: |
-          # --dry-run=client validates manifest syntax without
-          # needing a real cluster. Catches typos, wrong apiVersions,
-          # missing required fields before they reach production.
-          kubectl apply -f k8s/ --dry-run=client --validate=false
+          # Use an offline validator in CI when no cluster is available.
+          # This avoids kubectl trying to connect to localhost:8080.
+          docker run --rm -v "$PWD":/workspace instrumenta/kubeval --strict --kubernetes-version 1.28.0 /workspace/k8s/*.yaml
+          echo "All manifests valid"
 
   # Job 5: Deploy to Kubernetes (placeholder)
   deploy:
